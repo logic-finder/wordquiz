@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
       raise_err("단어장 파일을 열 수 없습니다; 종료");
 
    process_result = process_word_file(word_file, pairs, &pairs_len);
+   fclose(word_file);
    if (process_result == -1)
       raise_err("프로그램을 실행하기에 충분한 단어의 수가 아닙니다.");
    else if (process_result <= -2)

@@ -15,7 +15,7 @@ struct wmpair {
 
 void raise_err(char *, ...);
 void clear_input_buffer(void);
-int process_word_file(FILE *, struct wmpair *, int *);
+int process_word_file(char *, struct wmpair *, int *);
 int rand_range(int);
 void shuffle(int *, int);
 void make_quiz(int *, int, int, int, int *);
@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
    /**************************
     * Program initialization *
     **************************/
-   FILE *word_file;
    struct wmpair pairs[MAX_WORDS];
    int pairs_len;
    int process_result;
@@ -35,15 +34,13 @@ int main(int argc, char **argv) {
    if (argc != 2)
       raise_err("불충분한 인자 갯수; 사용법: wordquiz .dat");
 
-   if ((word_file = fopen(*(argv + 1), "r")) == NULL)
-      raise_err("단어장 파일을 열 수 없습니다; 종료");
-
-   process_result = process_word_file(word_file, pairs, &pairs_len);
-   fclose(word_file);
+   process_result = process_word_file(*(argv + 1), pairs, &pairs_len);
    if (process_result == -1)
+      raise_err("단어장 파일이 비어있습니다.");
+   else if (process_result == -2)
       raise_err("프로그램을 실행하기에 충분한 단어의 수가 아닙니다.");
-   else if (process_result <= -2)
-      raise_err("단어장 파일을 해석할 수 없습니다 (줄 %d); 종료", -process_result - 1);
+   else if (process_result <= -3)
+      raise_err("단어장 파일을 해석할 수 없습니다 (줄 %d); 종료", -process_result - 2);
    
    /**************
     * Title call *
@@ -179,7 +176,30 @@ void clear_input_buffer(void) {
  * [{ word: "otaku", mean: "십덕" },
  *  { word: "pizza", mean: "피자" }]
  */
-int process_word_file(FILE *fp, struct wmpair *arr, int *arr_len) {
+int process_word_file(char *filename, struct wmpair *arr, int *arr_len) {
+   /* Attempt to open file */
+   FILE *word_file;
+
+   if ((word_file = fopen(filename, "r")) == NULL)
+      raise_err("단어장 파일을 열 수 없습니다; 종료");
+
+   /* Check whether an empty file */
+   int ch;
+
+   ch = getc(word_file);
+   if (feof(word_file)) {
+      if (fclose(word_file))
+         raise_err("파일 닫기의 실패: (Line %d)", __LINE__);
+      return -1;  /* empty file */
+   }
+   if (ferror(word_file)) {
+      if (fclose(word_file))
+         raise_err("파일 닫기의 실패: (Line %d)", __LINE__);
+      raise_err("파일로부터 문자 읽기의 실패: (Line %d)", __LINE__);
+   }
+   ungetc(ch, word_file);
+
+   /* Read file */
    int count = 0;
 
    for (; count < MAX_WORDS; count++) {
@@ -187,40 +207,48 @@ int process_word_file(FILE *fp, struct wmpair *arr, int *arr_len) {
       char *s;
       char *word, *mean;
       
-      fgets(line, LINE_MAX, fp);
-      if (line == NULL)
-         exit(EXIT_FAILURE);
+      s = fgets(line, LINE_MAX, word_file);
+      if (s == NULL) {
+         if (fclose(word_file))
+            raise_err("파일 닫기의 실패: (Line %d)", __LINE__);
+         raise_err("파일로부터 문자열 읽기의 실패: (Line %d)", __LINE__);
+      }
 
+      // No need to check s == NULL, since we've
+      // already checked the file is not empty.
       s = strtok(line, "|");
-      if (s == NULL)
-         exit(EXIT_FAILURE);
-      
       word = malloc(strlen(s) + 1);
-      if (word == NULL)
-         exit(EXIT_FAILURE);
-
+      if (word == NULL) {
+         if (fclose(word_file))
+            raise_err("파일 닫기의 실패: (Line %d)", __LINE__);
+         raise_err("메모리 동적 할당의 실패: (Line %d)", __LINE__);
+      }
       strcpy(word, s);
 
       s = strtok(NULL, "\n");
       if (s == NULL)
-         return -2 - count;
-
+         return -3 - count;   /* The line where this
+                                 read error has occurred. */
       mean = malloc(strlen(s) + 1);
-      if (mean == NULL)
-         exit(EXIT_FAILURE);
-
+      if (mean == NULL) {
+         if (fclose(word_file))
+            raise_err("파일 닫기의 실패: (Line %d)", __LINE__);
+         raise_err("메모리 동적 할당의 실패: (Line %d)", __LINE__);
+      }
       strcpy(mean, s);
 
       arr[count].word = word;
       arr[count].mean = mean;
 
-      if (feof(fp))
+      if (feof(word_file))
          break;
    }
-
    *arr_len = count + 1;
 
-   return (count > 5) ? 0 : -1;
+   if (fclose(word_file))
+      raise_err("파일 닫기의 실패: (Line %d)", __LINE__);
+
+   return (count > 5) ? 0 : -2;  /* Not enough number of word */
 }
 
 /*

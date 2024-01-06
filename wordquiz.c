@@ -167,6 +167,7 @@ void raise_err(char *errmsg, ...) {
  */
 void clear_input_buffer(void) {
    int ch;
+   /* Note: Always the left side is evaluated first. */
    while ((ch = fgetc(stdin)) != '\n' && ch != EOF);
 }
 

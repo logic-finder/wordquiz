@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
    int answer;
    int response;
    int wrong_answer_count = 0;
-   int wrong_answer[pairs_len];
+   int wrong_answer[how_much];
 
    for (int i = 0; i < how_much; i++) {
       quiz_type = rand_range(2);

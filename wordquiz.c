@@ -62,8 +62,8 @@ int main(int argc, char **argv) {
          if (how_much > pairs_len)
             printf("입력된 수 %d는 최대 단어수 %d보다 클 수 없습니다.\n\n",
                how_much, pairs_len);
-         else if (how_much == 0)
-            printf("테스트할 단어의 수는 0일 수 없습니다.\n\n");
+         else if (how_much <= 0)
+            printf("테스트할 단어의 수는 0 이하일 수 없습니다.\n\n");
          else
             break;
       else

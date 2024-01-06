@@ -331,7 +331,7 @@ void validate_answer(int *response) {
    for (;;) {
       printf("\n답 입력: ");
       if (scanf("%d", response))
-         if (0 <= *response && *response <= 9)
+         if (1 <= *response && *response <= 5)
             break;
       printf("유효한 입력이 아닙니다.\n");
       clear_input_buffer();

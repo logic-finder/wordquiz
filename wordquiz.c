@@ -70,13 +70,11 @@ int main(int argc, char **argv) {
    clear_input_buffer();
    printf("\n");
 
+   /* Make a quiz list */
    int quiz_list[pairs_len];
-   int pick_list[pairs_len];
 
-   for (int i = 0; i < pairs_len; i++) {
+   for (int i = 0; i < pairs_len; i++)
       quiz_list[i] = i;
-      pick_list[i] = i;
-   }
    srand(time(NULL));
    shuffle(quiz_list, pairs_len);
 

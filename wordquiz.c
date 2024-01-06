@@ -213,8 +213,8 @@ int process_word_file(char *filename, struct wmpair *arr, int *arr_len) {
          raise_err("파일로부터 문자열 읽기의 실패: (Line %d)", __LINE__);
       }
 
-      // No need to check s == NULL, since we've
-      // already checked the file is not empty.
+      /* No need to check (s == NULL), since we've
+         already checked the file is not empty. */
       s = strtok(line, "|");
       word = malloc(strlen(s) + 1);
       if (word == NULL) {

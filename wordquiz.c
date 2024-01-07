@@ -283,7 +283,7 @@ void make_quiz(int *arr, int len, int initial, int total, int *answer) {
    shuffle(arr, len);
    *answer = find_answer(arr, len, initial);
    if (*answer == -1)
-      exit(EXIT_FAILURE);
+      raise_err("퀴즈 출제중의 오류: (Line %d)", __LINE__);
 }
 
 /*

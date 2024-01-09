@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
-#include <ctype.h>
 
 #define MAX_WORDS 1000
 #define LINE_MAX 1000
